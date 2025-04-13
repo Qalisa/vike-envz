@@ -25,76 +25,83 @@ pnpm add vike-envz zod
 
 ## Usage
 
-### Define Environment Schema
+### Best Practices
 
-Create a schema for your environment variables using Zod:
+Following a modular approach is recommended for better code organization and reusability:
+
+### 1. Define a Shared Environment Schema
+
+Create a dedicated file for your environment schema that can be shared between your Vite config and server code:
 
 ```typescript
-// envz.ts
-import { getEnvZ } from 'vike-envz';
-import { z } from 'zod';
+// server/envz.ts
+import type { EnvZ } from "vike-envz";
+import { z } from "zod";
 
-export const env = getEnvZ({
-  // Basic string validation
-  API_KEY: [z.string().min(1)],
+export const envSchema = {
+  // Build-time variables from import.meta.env
+  APP_VERSION: [z.string().nonempty(), "importMeta"],
   
-  // Number transformation (from string)
-  PORT: [z.string().transform(Number), 'process'],
+  // Runtime variables from process.env with type coercion
+  PORT: [z.coerce.number().positive().default(3000), "process"],
   
-  // Boolean transformation with specific source
-  DEBUG: [z.enum(['true', 'false']).transform(v => v === 'true'), 'importMeta'],
+  // Variables with default source ("all")
+  CANONICAL_URL: [z.string().nonempty()],
   
-  // URL validation
-  API_URL: [z.string().url()],
-});
+  // With default values
+  DEBUG: [z.enum(['true', 'false']).transform(v => v === 'true').default('false')],
+} satisfies EnvZ;
 ```
 
-### Configure Vite Plugin
+### 2. Configure Vite Plugin
 
-Add the vike-envz plugin to your Vite configuration:
+Use your shared schema in your Vite configuration:
 
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite';
+import vike from 'vike/plugin';
 import envZ from 'vike-envz/plugin';
-import { z } from 'zod';
+import { envSchema } from './server/envz';
 
 export default defineConfig({
   plugins: [
-    // Your other plugins...
-    
-    // Add the envZ plugin with your schema
-    envZ({
-      envSchema: {
-        API_KEY: [z.string().min(1)],
-        PORT: [z.string().transform(Number)],
-        DEBUG: [z.enum(['true', 'false']).transform(v => v === 'true')],
-        API_URL: [z.string().url()]
-      }
-    })
+    vike(),
+    envZ({ envSchema }),
   ]
 });
 ```
 
-### Use Environment Variables
-
-Use your validated environment variables in your code:
+### 3. Use in Server with vike-server
 
 ```typescript
-// server/api.ts
-import { env } from './envz';
+// server/index.ts
+import express from 'express';
+import { apply } from 'vike-server/express';
+import { serve } from 'vike-server/express/serve';
+import { getEnvZ } from "vike-envz";
+import { envSchema } from './envz';
 
-// Type-safe access to environment variables
-const server = createServer({
-  port: env.PORT, // number
-  debug: env.DEBUG, // boolean
-});
+function startServer() {
+  // Get validated environment variables
+  const { PORT, DEBUG, CANONICAL_URL } = getEnvZ(envSchema);
+  
+  const app = express();
+  
+  // Apply vike middleware
+  apply(app);
+  
+  // Use validated environment variables
+  if (DEBUG) {
+    console.log(`Server starting on port ${PORT}`);
+    console.log(`Canonical URL: ${CANONICAL_URL}`);
+  }
+  
+  // Start server with validated PORT
+  return serve(app, { port: PORT });
+}
 
-// Make API calls with validated URL
-const api = new ApiClient({
-  url: env.API_URL, // validated URL string
-  key: env.API_KEY  // non-empty string
-});
+export default startServer();
 ```
 
 ## Environment Variable Sources
@@ -105,29 +112,46 @@ You can specify the source for each environment variable:
 - `'importMeta'`: Variables are read from Vite's `import.meta.env`
 - `'all'`: Variables are read from `import.meta.env` first, then `process.env` as fallback (default)
 
+## Type Safety and Transformations
+
+The library provides full type inference for your environment variables:
+
+```typescript
+const env = getEnvZ({
+  // String validation
+  API_KEY: [z.string().min(1)],
+  
+  // Number transformation
+  PORT: [z.coerce.number().positive()],
+  
+  // Boolean transformation
+  DEBUG: [z.enum(['true', 'false']).transform(v => v === 'true')],
+  
+  // URL validation
+  API_URL: [z.string().url()],
+  
+  // With default values
+  TIMEOUT: [z.coerce.number().default(5000)],
+});
+
+// TypeScript will enforce correct types:
+env.PORT.toFixed(2); // OK - PORT is a number
+env.DEBUG && console.log('Debug mode enabled'); // OK - DEBUG is a boolean
+env.TIMEOUT > 1000; // OK - TIMEOUT is a number with default
+```
+
 ## Error Handling
 
 The library throws descriptive errors when environment variables fail validation:
 
 ```typescript
 try {
-  const env = getEnvZ({
-    PORT: [z.string().transform(Number)]
-  });
+  const env = getEnvZ(envSchema);
 } catch (error) {
   console.error('Environment validation failed:', error.message);
   // e.g. "Error while checking for "PORT" from env: Expected string, received undefined"
+  process.exit(1);
 }
-```
-
-## TypeScript Support
-
-The library is fully typed, providing autocompletion and type checking for your environment variables:
-
-```typescript
-// TypeScript will enforce correct types:
-env.PORT.toFixed(2); // OK - PORT is a number
-env.DEBUG.toLowerCase(); // Error - DEBUG is a boolean
 ```
 
 ## License
