@@ -7,3 +7,5 @@ export const envSchema = {
     PORT_B: [z.coerce.number().positive().default(3000)],
     CANONICAL_URL: [z.string().nonempty()/*, "all"*/],
   } satisfies EnvZ;
+
+export type envSchema$ = typeof envSchema;

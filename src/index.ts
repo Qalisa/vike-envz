@@ -17,8 +17,40 @@ const getEnvZ_S: typeof parseEnvZ = (...args) => singleton ?? (singleton = parse
 
 /** 
  * Singleton version of {@link parseEnvZ}. Call {@link getEnvZ_S} at least once before using it.
+ * 
+ * @example
+ * ///////////////////////////////////////////////
+ * // 1. Define your schema in a dedicated file //
+ * ///////////////////////////////////////////////
+ * 
+ * /// envz.ts
+ * import type { EnvZ } from "@qalisa/vike-envz"
+ * import { z } from "zod";
+ * 
+ * export const envSchema = {
+ *   APP_VERSION: [z.string().nonempty(), "importMeta"],
+ *   PORT: [z.coerce.number().positive().default(3000), "process"],
+ *   CANONICAL_URL: [z.string().nonempty()],
+ * } satisfies EnvZ;
+ * 
+ * // Export the type derived from the schema
+ * export type envSchema$ = typeof envSchema;
+ * 
+ * ///////////////////////////////////////////
+ * // 2. Use the schema in your application //
+ * ///////////////////////////////////////////
+ * 
+ * /// server/index.ts
+ * import { getEnvZ_S, getEnvZ_U } from "@qalisa/vike-envz"
+ * import { envSchema, type envSchema$ } from './envz';
+ * 
+ * // Initialize the environment variables first
+ * getEnvZ_S(import.meta.env, envSchema);
+ * 
+ * // Then you can safely use getEnvZ_U anywhere in your application
+ * const env = getEnvZ_U<envSchema$>();
  */
-const getEnvZ_U = <T extends EnvZ>(): T => {
+const getEnvZ_U = <T extends EnvZ>(): ReturnType<typeof parseEnvZ<T>> => {
     if (!singleton) 
         throw new Error("use getEnvZ_S before using getEnvZ")
     return singleton;
