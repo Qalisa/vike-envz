@@ -5,6 +5,7 @@
  */
 import { loadEnv, type Plugin } from "vite";
 import { type EnvZ } from "../types/public.js";
+import { dotenvValuesAtKeyName } from "../lib/index.js";
 
 /**
  * Creates a Vite plugin that injects environment variables into the build process.
@@ -44,7 +45,7 @@ const envZ = ({ envSchema }: { envSchema: EnvZ }): Plugin => {
       // Define environment variables to be injected into import.meta.env
       return {
         define: {
-          "import.meta.env.z.serverOnly": {
+          [`import.meta.env.${dotenvValuesAtKeyName}`]: {
             ...envFrom,
           },
         },
