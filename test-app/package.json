@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "vike dev",
+    "dev": "cross-env PORT=3001 CANONICAL_URL=http://should-not-be-imported.com vike dev",
     "build": "vike build",
     "preview": "vike preview"
   },
@@ -15,6 +15,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "@qalisa/vike-envz": "../",
     "@types/express": "^5.0.1",
     "@types/react": "^19.0.10",

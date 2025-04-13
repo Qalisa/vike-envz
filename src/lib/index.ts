@@ -1,13 +1,6 @@
-import type { z } from "zod";
-
-type EnvZSource = "process" | "importMeta" | "all";
-
-// Définition de l'entrée d'environnement comme un tuple [schema, source?]
-// avec "all" comme comportement par défaut
-type EnvZEntry<T extends z.ZodType> = [schema: T, source?: EnvZSource];
-
-// Type pour la map des entrées d'environnement
-export type EnvZ = Record<string, EnvZEntry<z.ZodType>>;
+import { type z } from "zod";
+import { type EnvZSource } from "../types/internal.js";
+import { type EnvZ } from "../types/public.js";
 
 //
 const _getPropertyFromSource = (

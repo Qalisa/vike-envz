@@ -1,6 +1,8 @@
-import {type EnvZ, mapEnvFromSources } from "./lib.js";
+import { mapEnvFromSources } from "./lib/index.js";
+import {type EnvZ } from "./types/public.js";
 
 /** recover server-side parsed and validated environment variables */
-const getEnvZ = (envConfig: EnvZ) => mapEnvFromSources(envConfig);
+const getEnvZ = <T extends EnvZ>(envConfig: T) => mapEnvFromSources(envConfig);
 
 export { getEnvZ };
+export * from './types/public.js';

@@ -1,5 +1,5 @@
 import { loadEnv, type Plugin } from "vite";
-import { type EnvZ } from "../lib.js";
+import { type EnvZ } from "../types/public.js";
 
 const envZ = ({ envSchema }: { envSchema: EnvZ }): Plugin => {
     return {
