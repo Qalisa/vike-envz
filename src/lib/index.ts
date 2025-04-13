@@ -7,9 +7,6 @@ import { type z } from "zod";
 import { type EnvZSource } from "../types/internal.js";
 import { type EnvZ } from "../types/public.js";
 
-// @ts-ignore - This property is injected by the Vite plugin
-const serverOnlyEnvZ = import.meta.env.z.serverOnly;
-
 /**
  * Retrieves an environment variable value from the specified source.
  *
@@ -20,17 +17,17 @@ const serverOnlyEnvZ = import.meta.env.z.serverOnly;
  */
 const _getPropertyFromSource = (
   propertyName: string,
-  source: EnvZSource,
+  from: EnvZSource,
+  of: Record<Exclude<EnvZSource, "all">, any>
 ): string | undefined => {
-  switch (source) {
+  switch (from) {
     case "process":
-      return process.env[propertyName];
     case "importMeta":
-      return serverOnlyEnvZ[propertyName];
+      return of[from][propertyName];
     case "all":
       return (
-        _getPropertyFromSource(propertyName, "importMeta") ??
-        _getPropertyFromSource(propertyName, "process")
+        _getPropertyFromSource(propertyName, "importMeta", of) ??
+        _getPropertyFromSource(propertyName, "process", of)
       );
   }
 };
@@ -47,6 +44,10 @@ const _getPropertyFromSource = (
 export const mapEnvFromSources = <T extends EnvZ>(
   envEntries: T,
 ): { [K in keyof T]: z.infer<T[K][0]> } => {
+  // @ts-ignore - This property is injected by the Vite plugin
+  // @note must not bind "import.meta.env" to a variable outside of a function call, else "import.meta.env.z" wont exist yet or be tree-shaken
+  const serverOnlyEnvZ = import.meta.env.z.serverOnly;
+
   //
   const rawValues = {} as {
     [K in keyof T]: ReturnType<typeof _getPropertyFromSource>;
@@ -56,7 +57,10 @@ export const mapEnvFromSources = <T extends EnvZ>(
   // Retrieve raw values from defined sources
   for (const key in envEntries) {
     const [, source = "all"] = envEntries[key];
-    rawValues[key] = _getPropertyFromSource(key, source);
+    rawValues[key] = _getPropertyFromSource(key, source, {
+      importMeta: serverOnlyEnvZ,
+      process: process.env
+    });
   }
 
   // Validate each value against its corresponding schema

@@ -9,7 +9,7 @@
             "preLaunchTask": "⚙️ Build Plugin",
             "serverReadyAction": {
                 "action": "debugWithChrome",
-                "pattern": "Local:   http://localhost:([0-9]+)/",
+                "pattern": "Server running at http://localhost:([0-9]+)/",
                 "uriFormat": "http://localhost:%s",
                 "killOnServerStop": true
             }
