@@ -7,6 +7,9 @@ import { type z } from "zod";
 import { type EnvZSource } from "../types/internal.js";
 import { type EnvZ } from "../types/public.js";
 
+// @ts-ignore - This property is injected by the Vite plugin
+const serverOnlyEnvZ = import.meta.env.z.serverOnly;
+
 /**
  * Retrieves an environment variable value from the specified source.
  *
@@ -23,8 +26,7 @@ const _getPropertyFromSource = (
     case "process":
       return process.env[propertyName];
     case "importMeta":
-      // @ts-ignore - This property is injected by the Vite plugin
-      return import.meta.env.z.serverOnly[propertyName];
+      return serverOnlyEnvZ[propertyName];
     case "all":
       return (
         _getPropertyFromSource(propertyName, "importMeta") ??
