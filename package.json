@@ -1,0 +1,42 @@
+{
+  "name": "@qalisa/vike-envz",
+  "version": "0.0.1",
+  "description": "[TO FILL]",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./plugin": "./dist/plugin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:dev": "tsc --sourceMap",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "vite": "^6",
+    "zod": "^3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "vite": "^6.2.6",
+    "typescript": "^5.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Qalisa/vike-envz.git"
+  },
+  "keywords": [
+    "vite",
+    "sitemap",
+    "plugin",
+    "vike"
+  ],
+  "author": "Qalisa",
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
+}

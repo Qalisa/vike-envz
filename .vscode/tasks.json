@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "⚙️ Build Plugin",
+			"type": "shell",
+			"command": "pnpm",
+			"args": ["build:dev"],
+			"options": {
+			  "cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "⚙️🚧 Build test project - w/ plugin",
+			"type": "shell",
+			"command": "pnpm",
+			"args": ["build"],
+			"options": {
+				"cwd": "${workspaceFolder}/test-app"
+			},
+			"dependsOn": ["⚙️ Build Plugin"],
+			"problemMatcher": []
+		}
+	]
+}

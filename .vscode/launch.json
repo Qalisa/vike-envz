@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "⚡ Run dev Server on test project - w/ plugin",
+            "request": "launch",
+            "command": "pnpm dev",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/test-app",
+            "preLaunchTask": "⚙️ Build Plugin",
+            "serverReadyAction": {
+                "action": "debugWithChrome",
+                "pattern": "Local:   http://localhost:([0-9]+)/",
+                "uriFormat": "http://localhost:%s",
+                "killOnServerStop": true
+            }
+        }
+    ]
+}
