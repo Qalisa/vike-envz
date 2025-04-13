@@ -1,6 +1,6 @@
 {
   "name": "@qalisa/vike-envz",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A type-safe environment variable management system for Vike applications that enables validation and transformation of environment variables using Zod schemas.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,6 +20,9 @@
   "peerDependencies": {
     "vite": "^6",
     "zod": "^3"
+  },
+  "dependencies": {
+    "vite": "^6"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

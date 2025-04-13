@@ -37,17 +37,15 @@ const _getPropertyFromSource = (
  *
  * @template T - Type extending EnvZ (a record of environment variable entries)
  * @param {T} envEntries - Configuration object defining environment variables and their validation schemas
+ * @param {Record<string, any>} importMetaEnv - expects "import.meta.env" here
  * @returns {Object} An object containing all validated and transformed environment variables
  * @throws {Error} When environment variables fail validation against their schemas
  * @internal
  */
 export const mapEnvFromSources = <T extends EnvZ>(
-  envEntries: T,
+  importMetaEnv: Record<string, any>,
+  envEntries: T,  
 ): { [K in keyof T]: z.infer<T[K][0]> } => {
-  // @ts-ignore - This property is injected by the Vite plugin
-  // @note must not bind "import.meta.env" to a variable outside of a function call, else "import.meta.env.z" wont exist yet or be tree-shaken
-  const serverOnlyEnvZ = import.meta.env.z.serverOnly;
-
   //
   const rawValues = {} as {
     [K in keyof T]: ReturnType<typeof _getPropertyFromSource>;
@@ -58,7 +56,7 @@ export const mapEnvFromSources = <T extends EnvZ>(
   for (const key in envEntries) {
     const [, source = "all"] = envEntries[key];
     rawValues[key] = _getPropertyFromSource(key, source, {
-      importMeta: serverOnlyEnvZ,
+      importMeta: importMetaEnv['z.serverOnly'],
       process: process.env
     });
   }

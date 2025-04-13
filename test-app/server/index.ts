@@ -5,7 +5,7 @@ import { getEnvZ } from "@qalisa/vike-envz"
 import { envSchema } from './envz';
  
 function startServer() {
-  const env = getEnvZ(envSchema);
+  const env = getEnvZ(import.meta.env, envSchema);
   const app = express()
   apply(app)
   return serve(app, { port: env.PORT_B })

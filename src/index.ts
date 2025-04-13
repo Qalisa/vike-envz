@@ -28,7 +28,7 @@ import { type EnvZ } from "./types/public.js";
  * // env.API_KEY is a validated non-empty string
  * ```
  */
-const getEnvZ = <T extends EnvZ>(envConfig: T) => mapEnvFromSources(envConfig);
+const getEnvZ = mapEnvFromSources;
 
 export { getEnvZ };
 export * from './types/public.js';
